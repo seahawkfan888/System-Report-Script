@@ -1,20 +1,35 @@
-#!/bin/bash
+# Report header
+echo "======================================"
+echo "   SIMPLE SYSTEM USAGE REPORT"
+echo "   Generated on: $(date)"
+echo "======================================"
 
-# Get CPU Usage
-cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2+$4}')
+# Hostname
+echo "Hostname: $(hostname)"
 
-# Get Memory Usage
-memory_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}')
+# Uptime
+echo "Uptime: $(uptime -p)"
+echo "Load Average: $(uptime | awk -F'load average:' '{print $2}')"
 
-# Get Disk Usage
-disk_usage=$(df -h / | grep -Eo '[0-9]+%')
+# Memory usage
+echo "--------------------------------------"
+echo "Memory Usage:"
+free -h | awk 'NR==1 || NR==2 {print}'
 
-# Get current timestamp
-timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+# Disk usage
+echo "--------------------------------------"
+echo "Disk Usage:"
+df -h --total | grep -E 'Filesystem|total'
 
-# Print Report
-echo "=== System Usage Report ==="
-echo "Timestamp: $timestamp"
-echo "CPU Usage: $cpu_usage%"
-echo "Memory Usage: $memory_usage%"
-echo "Disk Usage: $disk_usage on /"
+# Top 5 processes by CPU usage
+echo "--------------------------------------"
+echo "Top 5 CPU-consuming processes:"
+ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -n 6
+
+# Top 5 processes by Memory usage
+echo "--------------------------------------"
+echo "Top 5 Memory-consuming processes:"
+ps -eo pid,comm,%cpu,%mem --sort=-%mem | head -n 6
+
+echo "======================================"
+echo "Report completed."
